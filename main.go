@@ -44,7 +44,7 @@ func GetServerInfo() *models.ServerInfo {
 	apiJson := getAPIData("getServerInfo", map[string]string{})
 
 	if apiJson != nil {
-		var serverInfo *models.ServerInfo
+		var serverInfo *models.ServerInfo = &models.ServerInfo{}
 
 		if err := json.Unmarshal(apiJson, serverInfo); err == nil {
 			return serverInfo
