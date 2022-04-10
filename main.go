@@ -1,4 +1,4 @@
-package main
+package AmazonSessionAPIClient
 
 import (
 	"encoding/json"
@@ -54,7 +54,7 @@ func GetServerInfo() *models.ServerInfo {
 	return nil
 }
 
-//Kaldirildi.
+//Kaldirildi.//
 //Random bir amazon sessionlari dondurur. Serverdan bir istek beklendigi icin bekleme olabilir.
 //func GetAmazonSessionsReq(targetHostCountry string, deliveryCountry string, updateSession bool, quantity int) []*models.SessionInfo {
 //	for {
