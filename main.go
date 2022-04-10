@@ -113,3 +113,6 @@ func getAPIData(apiTarget string, apiParam map[string]string) []byte {
 
 	return body
 }
+
+func main() {
+}
