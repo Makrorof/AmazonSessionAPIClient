@@ -124,6 +124,8 @@ func getAPIData(apiTarget string, apiParam map[string]string) ([]byte, bool) {
 		return nil, false
 	}
 
+	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
