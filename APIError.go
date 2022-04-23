@@ -1,4 +1,4 @@
-package models
+package AmazonSessionAPIClient
 
 type ErrorCode int
 

@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/Makrorof/AmazonSessionAPIClient/models"
 )
 
 var APISERVER_HOST string
@@ -16,18 +15,16 @@ var APISERVER_PORT string
 
 var client *http.Client = &http.Client{}
 
-func APIVersion() string {
-	return "v1"
-}
+const APIVersion string = "v1"
 
 //Random bir amazon session dondurur. Serverdan bir istek beklendigi icin bekleme olabilir. Basarili olmaya calisir.
 //requestCount: kac kere kullanilacak.
-func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int) *models.SessionInfo {
+func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool) *SessionInfo {
 	for {
-		apiJson := getAPIData("getSession", map[string]string{"updateSession": strconv.FormatBool(updateSession), "requestCount": fmt.Sprint(requestCount), "targetHostCountry": targetHostCountry, "deliveryCountry": deliveryCountry})
+		apiJson, _ := getAPIData("getSession", map[string]string{"clearCart": strconv.FormatBool(clearCart), "updateSession": strconv.FormatBool(updateSession), "requestCount": fmt.Sprint(requestCount), "targetHostCountry": targetHostCountry, "deliveryCountry": deliveryCountry})
 
 		if apiJson != nil {
-			var sessionInfo *models.SessionInfo = &models.SessionInfo{Code: -1}
+			var sessionInfo *SessionInfo = &SessionInfo{Code: -1}
 
 			if err := json.Unmarshal(apiJson, sessionInfo); err == nil {
 				if sessionInfo.Code == 0 { //TODO:buraya panel icin log eklenecek.
@@ -40,11 +37,11 @@ func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updat
 	}
 }
 
-func GetServerInfo() *models.ServerInfo {
-	apiJson := getAPIData("getServerInfo", map[string]string{})
+func GetServerInfo() *ServerInfo {
+	apiJson, _ := getAPIData("getServerInfo", map[string]string{})
 
 	if apiJson != nil {
-		var serverInfo *models.ServerInfo = &models.ServerInfo{}
+		var serverInfo *ServerInfo = &ServerInfo{}
 
 		if err := json.Unmarshal(apiJson, serverInfo); err == nil {
 			return serverInfo
@@ -52,6 +49,28 @@ func GetServerInfo() *models.ServerInfo {
 	}
 
 	return nil
+}
+
+func FeedbackClearCart(sessionInfo *SessionInfo) {
+	sendErrorCount := 0
+
+	sessionID := sessionInfo.Cookies["session-id"]
+
+	if sessionID == "" {
+		log.Println("Feedback de session-id bulunamadi.")
+		return
+	}
+
+	for sendErrorCount <= 5 {
+		_, ok := getAPIData("feedBackClearCart", map[string]string{"sessionID": sessionID})
+
+		if ok {
+			break
+		} else {
+			sendErrorCount++
+			time.Sleep(time.Second * 1)
+		}
+	}
 }
 
 //Kaldirildi.//
@@ -77,9 +96,9 @@ func GetServerInfo() *models.ServerInfo {
 //API baglantisi yapar ve istenilen verileri alir
 //apiTarget => getSession, getSessions, getInfo
 //apiParam => updateSession=true, quantity=31, country=US
-func getAPIData(apiTarget string, apiParam map[string]string) []byte {
+func getAPIData(apiTarget string, apiParam map[string]string) ([]byte, bool) {
 	///api/v1/
-	url := APISERVER_HOST + ":" + APISERVER_PORT + "/api/" + APIVersion() + "/" + apiTarget
+	url := APISERVER_HOST + ":" + APISERVER_PORT + "/api/" + APIVersion + "/" + apiTarget
 
 	if len(apiParam) != 0 {
 		url += "?"
@@ -95,21 +114,21 @@ func getAPIData(apiTarget string, apiParam map[string]string) []byte {
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
-		return nil
+		return nil, false
 	}
 
 	//Do
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return nil
+		return nil, false
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		return nil
+		return nil, false
 	}
 
-	return body
+	return body, resp.StatusCode == 200
 }

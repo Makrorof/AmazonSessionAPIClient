@@ -1,4 +1,4 @@
-package models
+package AmazonSessionAPIClient
 
 type SessionInfo struct {
 	Cookies           map[string]string `json:"cookies"`

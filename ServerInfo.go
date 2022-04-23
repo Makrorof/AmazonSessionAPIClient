@@ -1,4 +1,4 @@
-package models
+package AmazonSessionAPIClient
 
 type ServerInfo struct {
 	ProxyCount                        int  `json:"proxyCount"`
