@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -73,45 +74,26 @@ func FeedbackClearCart(sessionInfo *SessionInfo) {
 	}
 }
 
-//Kaldirildi.//
-//Random bir amazon sessionlari dondurur. Serverdan bir istek beklendigi icin bekleme olabilir.
-//func GetAmazonSessionsReq(targetHostCountry string, deliveryCountry string, updateSession bool, quantity int) []*models.SessionInfo {
-//	for {
-//		apiJson := getAPIData("getSessions", map[string]string{"updateSession": strconv.FormatBool(updateSession), "targetHostCountry": targetHostCountry, "deliveryCountry": deliveryCountry, "quantity": strconv.Itoa(quantity)})
-//
-//		if apiJson != nil {
-//			var sessionInfoList []*models.SessionInfo
-//
-//			if err := json.Unmarshal(apiJson, &sessionInfoList); err == nil {
-//				if len(sessionInfoList) > 0 { //TODO:buraya panel icin log eklenecek.
-//					return sessionInfoList
-//				}
-//			}
-//		}
-//
-//		time.Sleep(10 * time.Second)
-//	}
-//}
-
 //API baglantisi yapar ve istenilen verileri alir
 //apiTarget => getSession, getSessions, getInfo
 //apiParam => updateSession=true, quantity=31, country=US
 func getAPIData(apiTarget string, apiParam map[string]string) ([]byte, bool) {
 	///api/v1/
-	url := APISERVER_HOST + ":" + APISERVER_PORT + "/api/" + APIVersion + "/" + apiTarget
-
-	if len(apiParam) != 0 {
-		url += "?"
-
-		for key, value := range apiParam {
-			url += key + "=" + value
-			url += "&"
-		}
-
-		url = url[0 : len(url)-1]
+	apiURL, err := url.Parse(APISERVER_HOST + ":" + APISERVER_PORT + "/api/" + APIVersion + "/" + apiTarget)
+	if err != nil {
+		log.Println("Api url parse error: ", err)
+		return nil, false
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	params := url.Values{}
+
+	for key, value := range apiParam {
+		params.Add(key, value)
+	}
+
+	apiURL.RawQuery = params.Encode()
+
+	req, err := http.NewRequest("GET", apiURL.String(), nil)
 
 	if err != nil {
 		return nil, false
