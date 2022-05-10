@@ -28,7 +28,7 @@ func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updat
 			var sessionInfo *SessionInfo = &SessionInfo{Code: -1}
 
 			if err := json.Unmarshal(apiJson, sessionInfo); err == nil {
-				if sessionInfo.Code == 0 { //TODO:buraya panel icin log eklenecek.
+				if sessionInfo.Code == 0 {
 					return sessionInfo
 				}
 			}

@@ -1,43 +1,61 @@
 package AmazonSessionAPIClient
 
-type ErrorCode int
+import "errors"
+
+type Error int
 
 type APIError struct {
-	Code        ErrorCode `json:"code"`
-	Description string    `json:"description"`
+	Code        Error  `json:"code"`
+	Description string `json:"description"`
 }
 
-//Hatalari onlemek icin iota kullanilmadi.
-//Struct ve const degerler birlestirilebilir. Error Code'a erismek icin UnknownError.Code gibi kullanilabilir.
 const (
-	UnknownError_Code        ErrorCode = 0
-	NotEnoughSession_Code    ErrorCode = 1
-	NotFoundSessionInfo_Code ErrorCode = 2
-	InvalidQuantity_Code     ErrorCode = 3
-	InvalidRequestCount_Code ErrorCode = 4
+	OkError                        Error = 0
+	UnknownError                   Error = 1
+	NotEnoughSession               Error = 2
+	NotFoundSessionInfo            Error = 3
+	InvalidQuantity                Error = 4
+	InvalidRequestCount            Error = 5
+	UnknownCountry                 Error = 6
+	UpdateSessionFunctionNotFound  Error = 7
+	AmazonAddressBlock             Error = 8
+	AmazonSessionIDNotFound        Error = 9
+	AmazonCaptchaMaxReVisit        Error = 10
+	AmazonCollyCollectorNotCreated Error = 11
+	NotFound                       Error = 12
+	NotSupportedCountry            Error = 13
 )
 
-var UnknownError APIError = APIError{
-	Code:        UnknownError_Code,
-	Description: "Bilinmeyen bir hata",
+var statusText = map[Error]string{
+	UnknownError:                   "Bilinmeyen bir hata",
+	NotEnoughSession:               "Kullanilabilir sayida session bulunamadi. Tum sessionlarin kullanim limiti dolmus, yeni sessionlar uretiyor yada proxy ile ilgili sorun olmus olabilir.",
+	NotFoundSessionInfo:            "Session bilgisine ulasilmadi. Tekrar istek cagrilabilir.",
+	InvalidQuantity:                "Request sayisi 0 dan buyuk olmali. min:1, max:sinirsiz. Not: quantity cok buyuk verilirse ayni request degerlerin gelme sansi var.",
+	InvalidRequestCount:            "Request sayisi 0 dan buyuk olmali. min:1, max:sinirsiz.",
+	UnknownCountry:                 "Verilen bolge yanlis.",
+	UpdateSessionFunctionNotFound:  "Update Session Function Not Found",
+	AmazonAddressBlock:             "Amazon Address Block",
+	AmazonSessionIDNotFound:        "Amazon Session ID Not Found",
+	AmazonCaptchaMaxReVisit:        "Amazon Captcha Max ReVisit",
+	AmazonCollyCollectorNotCreated: "Amazon Colly Collector Not Created",
+	NotFound:                       "Not Found",
+	NotSupportedCountry:            "Verdiginiz bolge desteklenmiyor. Lutfen verdiginiz bolgeleri parametre olarak servera ekleyiniz.",
 }
 
-var NotEnoughSession APIError = APIError{
-	Code:        NotEnoughSession_Code,
-	Description: "Kullanilabilir sayida session bulunamadi. Tum sessionlarin kullanim limiti dolmus, yeni sessionlar uretiyor yada proxy ile ilgili sorun olmus olabilir.",
+func GetAPIError(errType Error) APIError {
+	return APIError{Code: errType, Description: statusText[errType]}
 }
 
-var NotFoundSessionInfo APIError = APIError{
-	Code:        NotFoundSessionInfo_Code,
-	Description: "Session bilgisine ulasilmadi. Tekrar istek cagrilabilir.",
+func GetError(errType Error) error {
+	return errors.New(statusText[errType])
 }
 
-var InvalidQuantity APIError = APIError{
-	Code:        NotFoundSessionInfo_Code,
-	Description: "Request sayisi 0 dan buyuk olmali. min:1, max:sinirsiz. Not: quantity cok buyuk verilirse ayni request degerlerin gelme sansi var.",
-}
+func GetErrorType(err error) Error {
+	for index, status := range statusText {
+		if status == err.Error() {
+			return index
+		}
+	}
 
-var InvalidRequestCount APIError = APIError{
-	Code:        InvalidRequestCount_Code,
-	Description: "Request sayisi 0 dan buyuk olmali. min:1, max:sinirsiz.",
+	return -1
 }
