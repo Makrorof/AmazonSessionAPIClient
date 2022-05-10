@@ -50,7 +50,7 @@ var AMAZON_COUNTRIES map[string]Country = map[string]Country{
 	//"ES": AcquireCountry("Spain", "EUR", "https://www.amazon.es", "ES", "", ""), //kullanilamaz
 	//"TR": AcquireCountry("Turkey", "TRY", "https://www.amazon.com.tr", "TR", "", ""), //kullanilamaz
 	//"AE": AcquireCountry("United Arab Emirates", "AED", "https://www.amazon.ae", "AE", "", ""), //kullanilamaz
-	"GB": AcquireCountry("United Kingdom", "GBP", "https://www.amazon.co.uk", "GB", "GL7 1WQ", ""),
+	"UK": AcquireCountry("United Kingdom", "GBP", "https://www.amazon.co.uk", "GB", "GL7 1WQ", ""),
 	//"JP": AcquireCountry("Japan", "JPY", "https://www.amazon.jp", "JP", "", ""), //kullanilamaz
 }
 
