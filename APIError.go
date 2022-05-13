@@ -26,6 +26,10 @@ const (
 	NotSupportedCountry            Error = 13
 )
 
+const (
+	CaptchaError Error = -1000
+)
+
 var statusText = map[Error]string{
 	UnknownError:                   "Bilinmeyen bir hata",
 	NotEnoughSession:               "Kullanilabilir sayida session bulunamadi. Tum sessionlarin kullanim limiti dolmus, yeni sessionlar uretiyor yada proxy ile ilgili sorun olmus olabilir.",
@@ -40,6 +44,7 @@ var statusText = map[Error]string{
 	AmazonCollyCollectorNotCreated: "Amazon Colly Collector Not Created",
 	NotFound:                       "Not Found",
 	NotSupportedCountry:            "Verdiginiz bolge desteklenmiyor. Lutfen verdiginiz bolgeleri parametre olarak servera ekleyiniz.",
+	CaptchaError:                   "Baglanti yapilirken capcha istendi.",
 }
 
 func GetAPIError(errType Error) APIError {

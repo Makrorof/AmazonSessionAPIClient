@@ -100,13 +100,31 @@ func (handler *CollyHandler) GetUserAgent() string {
 
 //Header ile visit
 func (handler *CollyHandler) visit(URL string, header map[string][]string) error {
+	captchaError := false
+	defer handler.OnHTMLDetach("body > div > div.a-row.a-spacing-double-large > div.a-section > div > div > form")
+	handler.OnHtml("body > div > div.a-row.a-spacing-double-large > div.a-section > div > div > form", func(h *colly.HTMLElement) {
+		if h.Attr("action") == "/errors/validateCaptcha" {
+			captchaError = true
+		}
+	})
+
 	if handler.collector.CheckHead {
 		if check := handler.collector.Request("HEAD", URL, nil, nil, header); check != nil {
 			return check
 		}
 	}
 
-	return handler.collector.Request("GET", URL, nil, nil, header)
+	err := handler.collector.Request("GET", URL, nil, nil, header)
+
+	if err != nil {
+		return err
+	}
+
+	if captchaError {
+		return GetError(CaptchaError)
+	}
+
+	return nil
 }
 
 func (handler *CollyHandler) VisitH(url string, header map[string][]string) error {
@@ -146,6 +164,14 @@ func (handler *CollyHandler) VisitPost(url string, postData map[string]string, j
 
 	errCount := 0
 	var postData_ io.Reader
+
+	captchaError := false
+	defer handler.OnHTMLDetach("body > div > div.a-row.a-spacing-double-large > div.a-section > div > div > form")
+	handler.OnHtml("body > div > div.a-row.a-spacing-double-large > div.a-section > div > div > form", func(h *colly.HTMLElement) {
+		if h.Attr("action") == "/errors/validateCaptcha" {
+			captchaError = true
+		}
+	})
 
 	if jsonContentType {
 		json_data, err := json.Marshal(postData)
@@ -192,6 +218,10 @@ func (handler *CollyHandler) VisitPost(url string, postData map[string]string, j
 
 			time.Sleep(time.Second * 3)
 		}
+	}
+
+	if captchaError {
+		return GetError(CaptchaError)
 	}
 
 	return nil
