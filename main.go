@@ -18,6 +18,17 @@ var client *http.Client = &http.Client{}
 
 const APIVersion string = "v1"
 
+func GetColly(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool) *CollyHandler {
+	sessinInfo := GetAmazonSessionReq(targetHostCountry, deliveryCountry, updateSession, requestCount, clearCart)
+
+	if sessinInfo == nil {
+		log.Println("AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
+		return nil
+	}
+
+	return CreateCollyHandler(sessinInfo.Proxy, AMAZON_COUNTRIES[targetHostCountry], sessinInfo.UserAgent, sessinInfo.Cookies)
+}
+
 //Random bir amazon session dondurur. Serverdan bir istek beklendigi icin bekleme olabilir. Basarili olmaya calisir.
 //requestCount: kac kere kullanilacak.
 func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool) *SessionInfo {
