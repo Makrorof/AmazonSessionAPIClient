@@ -147,7 +147,7 @@ func (handler *CollyHandler) VisitH(url string, header map[string][]string) erro
 				return err
 			}
 
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Millisecond * 100)
 		}
 	}
 
@@ -216,7 +216,7 @@ func (handler *CollyHandler) VisitPost(url string, postData map[string]string, j
 				return err
 			}
 
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Millisecond * 100)
 		}
 	}
 
