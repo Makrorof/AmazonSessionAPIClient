@@ -29,6 +29,38 @@ func GetColly(targetHostCountry string, deliveryCountry string, updateSession bo
 	return CreateCollyHandler(sessinInfo.Proxy, AMAZON_COUNTRIES[targetHostCountry], sessinInfo.UserAgent, sessinInfo.Cookies)
 }
 
+func GetCollyX(targetHostCountry string, updateSession bool, requestCount int, clearCart bool) *CollyHandler {
+	sessinInfo := GetAmazonSessionReqX(targetHostCountry, updateSession, requestCount, clearCart)
+
+	if sessinInfo == nil {
+		log.Println("AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
+		return nil
+	}
+
+	return CreateCollyHandler(sessinInfo.Proxy, AMAZON_COUNTRIES[targetHostCountry], sessinInfo.UserAgent, sessinInfo.Cookies)
+}
+
+//Random bir amazon session dondurur. Serverdan bir istek beklendigi icin bekleme olabilir. Basarili olmaya calisir.
+//Sadece targetHost ile islem yapilir delivery country random gelir.
+//requestCount: kac kere kullanilacak.
+func GetAmazonSessionReqX(targetHostCountry string, updateSession bool, requestCount int, clearCart bool) *SessionInfo {
+	for {
+		apiJson, _ := getAPIData("getSession", map[string]string{"clearCart": strconv.FormatBool(clearCart), "updateSession": strconv.FormatBool(updateSession), "requestCount": fmt.Sprint(requestCount), "targetHostCountry": targetHostCountry})
+
+		if apiJson != nil {
+			var sessionInfo *SessionInfo = &SessionInfo{Code: -1}
+
+			if err := json.Unmarshal(apiJson, sessionInfo); err == nil {
+				if sessionInfo.Code == 0 {
+					return sessionInfo
+				}
+			}
+		}
+
+		time.Sleep(10 * time.Second)
+	}
+}
+
 //Random bir amazon session dondurur. Serverdan bir istek beklendigi icin bekleme olabilir. Basarili olmaya calisir.
 //requestCount: kac kere kullanilacak.
 func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool) *SessionInfo {
