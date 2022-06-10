@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -22,7 +21,7 @@ func GetColly(targetHostCountry string, deliveryCountry string, updateSession bo
 	sessinInfo := GetAmazonSessionReq(targetHostCountry, deliveryCountry, updateSession, requestCount, clearCart)
 
 	if sessinInfo == nil {
-		log.Println("AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
+		PrintLog(ERROR_LOGS, "AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
 		return nil
 	}
 
@@ -33,7 +32,7 @@ func GetCollyX(targetHostCountry string, updateSession bool, requestCount int, c
 	sessinInfo := GetAmazonSessionReqX(targetHostCountry, updateSession, requestCount, clearCart)
 
 	if sessinInfo == nil {
-		log.Println("AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
+		PrintLog(ERROR_LOGS, "AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
 		return nil
 	}
 
@@ -101,7 +100,7 @@ func FeedbackClearCart(sessionInfo *SessionInfo) {
 	sessionID := sessionInfo.Cookies["session-id"]
 
 	if sessionID == "" {
-		log.Println("Feedback de session-id bulunamadi.")
+		PrintLog(ERROR_LOGS, "Feedback de session-id bulunamadi.")
 		return
 	}
 
@@ -124,7 +123,7 @@ func getAPIData(apiTarget string, apiParam map[string]string) ([]byte, bool) {
 	///api/v1/
 	apiURL, err := url.Parse(APISERVER_HOST + ":" + APISERVER_PORT + "/api/" + APIVersion + "/" + apiTarget)
 	if err != nil {
-		log.Println("Api url parse error: ", err)
+		PrintLog(ERROR_LOGS, "Api url parse error: ", err)
 		return nil, false
 	}
 

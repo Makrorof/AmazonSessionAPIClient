@@ -65,7 +65,7 @@ func CreateCollyCollector(proxy string, country Country, userAgent string, cooki
 		err := c.SetProxy(proxy)
 
 		if err != nil {
-			log.Println("Set proxy de sorun olustu. ", err)
+			PrintLog(ERROR_LOGS, "Set proxy de sorun olustu. ", err)
 			return nil
 		}
 	}
@@ -137,13 +137,13 @@ func (handler *CollyHandler) VisitH(url string, header map[string][]string) erro
 		if err == nil {
 			break
 		} else if err != nil && err.Error() != http.StatusText(http.StatusServiceUnavailable) {
-			//log.Println("Colly Get Err :", err, " URL", url)
+			//PrintLog(WARNING_LOGS, "Colly Get Err :", err, " URL", url)
 			return err
 		} else {
 			errCount++
 
 			if errCount == 6 {
-				log.Println("Colly Get Err :", err, " URL", url)
+				PrintLog(WARNING_LOGS, "Colly Get Err :", err, " URL", url)
 				return err
 			}
 
@@ -176,7 +176,7 @@ func (handler *CollyHandler) VisitPost(url string, postData map[string]string, j
 	if jsonContentType {
 		json_data, err := json.Marshal(postData)
 		if err != nil {
-			log.Println("Post icin verilen data json parse edilemedi. Err:", err)
+			PrintLog(ERROR_LOGS, "Post icin verilen data json parse edilemedi. Err:", err)
 			return err
 		}
 		postData_ = bytes.NewReader(json_data)
@@ -184,7 +184,7 @@ func (handler *CollyHandler) VisitPost(url string, postData map[string]string, j
 		val, err := form.EncodeToValues(postData)
 
 		if err != nil {
-			log.Println("Post icin verilen data form parse edilemedi. Err:", err)
+			PrintLog(ERROR_LOGS, "Post icin verilen data form parse edilemedi. Err:", err)
 			return err
 		}
 
@@ -206,13 +206,13 @@ func (handler *CollyHandler) VisitPost(url string, postData map[string]string, j
 		if err == nil {
 			break
 		} else if err != nil && err.Error() != http.StatusText(http.StatusServiceUnavailable) {
-			//log.Println("Colly Get Err :", err, " URL", url)
+			//PrintLog(WARNING_LOGS, "Colly Get Err :", err, " URL", url)
 			return err
 		} else {
 			errCount++
 
 			if errCount == 6 {
-				log.Println("Colly Get Err :", err, " URL", url)
+				PrintLog(WARNING_LOGS, "Colly Get Err :", err, " URL", url)
 				return err
 			}
 
