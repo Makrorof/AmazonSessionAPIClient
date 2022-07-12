@@ -24,6 +24,7 @@ const (
 	AmazonCollyCollectorNotCreated Error = 11
 	NotFound                       Error = 12
 	NotSupportedCountry            Error = 13
+	MultiLockSessionError          Error = 14
 )
 
 const (
@@ -44,7 +45,10 @@ var statusText = map[Error]string{
 	AmazonCollyCollectorNotCreated: "Amazon Colly Collector Not Created",
 	NotFound:                       "Not Found",
 	NotSupportedCountry:            "Verdiginiz bolge desteklenmiyor. Lutfen verdiginiz bolgeleri parametre olarak servera ekleyiniz.",
-	CaptchaError:                   "Baglanti yapilirken capcha istendi.",
+	MultiLockSessionError:          "Birden fazla session kitleme islemi cagrilamaz. ClearCart ve lockSession gibi.",
+
+	//------(-)1000-------//
+	CaptchaError: "Baglanti yapilirken capcha istendi.",
 }
 
 func GetAPIError(errType Error) APIError {

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 )
@@ -17,8 +18,9 @@ var client *http.Client = &http.Client{}
 
 const APIVersion string = "v1"
 
-func GetColly(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool) *CollyHandler {
-	sessinInfo := GetAmazonSessionReq(targetHostCountry, deliveryCountry, updateSession, requestCount, clearCart)
+//WARNING:clearCart ve lockSession ayni anda cagrilamaz. => os.Exit(1)
+func GetColly(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool, sessionLock bool) *CollyHandler {
+	sessinInfo := GetAmazonSessionReq(targetHostCountry, deliveryCountry, updateSession, requestCount, clearCart, sessionLock)
 
 	if sessinInfo == nil {
 		PrintLog(ERROR_LOGS, "AmazonSessionAPIClient'de sorun var sessionInfo bos geldi.")
@@ -62,9 +64,16 @@ func GetAmazonSessionReqX(targetHostCountry string, updateSession bool, requestC
 
 //Random bir amazon session dondurur. Serverdan bir istek beklendigi icin bekleme olabilir. Basarili olmaya calisir.
 //requestCount: kac kere kullanilacak.
-func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool) *SessionInfo {
+//WARNING:clearCart ve lockSession ayni anda cagrilamaz. => os.Exit(1)
+func GetAmazonSessionReq(targetHostCountry string, deliveryCountry string, updateSession bool, requestCount int, clearCart bool, lockSession bool) *SessionInfo {
+	if clearCart && lockSession {
+		PrintLog(ERROR_LOGS, "AmazonSessionAPIClient'de clearCart ve lockSession ayni anda cagrilamaz.")
+		os.Exit(1)
+		return nil
+	}
+
 	for {
-		apiJson, _ := getAPIData("getSession", map[string]string{"clearCart": strconv.FormatBool(clearCart), "updateSession": strconv.FormatBool(updateSession), "requestCount": fmt.Sprint(requestCount), "targetHostCountry": targetHostCountry, "deliveryCountry": deliveryCountry})
+		apiJson, _ := getAPIData("getSession", map[string]string{"clearCart": strconv.FormatBool(clearCart), "lockSession": strconv.FormatBool(lockSession), "updateSession": strconv.FormatBool(updateSession), "requestCount": fmt.Sprint(requestCount), "targetHostCountry": targetHostCountry, "deliveryCountry": deliveryCountry})
 
 		if apiJson != nil {
 			var sessionInfo *SessionInfo = &SessionInfo{Code: -1}
@@ -100,12 +109,34 @@ func FeedbackClearCart(sessionInfo *SessionInfo) {
 	sessionID := sessionInfo.Cookies["session-id"]
 
 	if sessionID == "" {
-		PrintLog(ERROR_LOGS, "Feedback de session-id bulunamadi.")
+		PrintLog(ERROR_LOGS, "FeedbackClearCart da session-id bulunamadi.")
 		return
 	}
 
 	for sendErrorCount <= 5 {
 		_, ok := getAPIData("feedBackClearCart", map[string]string{"sessionID": sessionID})
+
+		if ok {
+			break
+		} else {
+			sendErrorCount++
+			time.Sleep(time.Second * 1)
+		}
+	}
+}
+
+func FeedbackUnlockSession(sessionInfo *SessionInfo) {
+	sendErrorCount := 0
+
+	sessionID := sessionInfo.Cookies["session-id"]
+
+	if sessionID == "" {
+		PrintLog(ERROR_LOGS, "FeedbackUnlockSession da session-id bulunamadi.")
+		return
+	}
+
+	for sendErrorCount <= 5 {
+		_, ok := getAPIData("feedBackUnlockSession", map[string]string{"sessionID": sessionID})
 
 		if ok {
 			break
