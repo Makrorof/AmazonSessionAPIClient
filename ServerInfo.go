@@ -7,4 +7,5 @@ type ServerInfo struct {
 	UsableSessionCount                map[string]int `json:"usableSessionCount"`
 	SessionsAreCreating               bool           `json:"sessionsAreCreating"`
 	SearchingForSessionCreatorProxies bool           `json:"searchingForSessionCreatorProxies"`
+	UseServerIP                       bool           `json:"useServerIP"`
 }
