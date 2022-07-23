@@ -8,4 +8,5 @@ type ServerInfo struct {
 	SessionsAreCreating               bool           `json:"sessionsAreCreating"`
 	SearchingForSessionCreatorProxies bool           `json:"searchingForSessionCreatorProxies"`
 	UseServerIP                       bool           `json:"useServerIP"`
+	IsServerIPUsed                    bool           `json:"isServerIPUsed"`
 }
